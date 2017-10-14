@@ -114,7 +114,7 @@ def makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv, image):
 	# Create an image to draw the lines on
 	#warp_zero = np.zeros_like(warped).astype(np.uint8)
 	#color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
-	
+	#print(ploty)
 	color_warp = np.zeros(warped.shape, dtype=np.uint8)
 	
 	# Recast the x and y points into usable format for cv2.fillPoly()
@@ -140,13 +140,15 @@ def makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv, image):
 if __name__ == "__main__":
 	import matplotlib.pyplot as plt 
 	#img = cv2.imread('test_images/straight_lines1.jpg')
-	img = cv2.imread('test_images/test1.jpg')
+	#img = cv2.imread('test_images/test1.jpg')
+	
+	img = cv2.imread('lastImg.png')
 	
 	Bi_img = createBinaryImage.pipeline(img)
 	warped, Minv, undist = perspectivTransform.perspectiveTransform(img)
 	warped, Minv, n_undist = perspectivTransform.perspectiveTransform(Bi_img)
 	
-	left_fit , right_fit = slidingWindowFit(warped)
+	left_fit , right_fit, t = slidingWindowFit(warped)
 	
 	
 	
@@ -158,7 +160,7 @@ if __name__ == "__main__":
 	right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 
 	
-	newwarp = makePrettyLane(warped,left_fitx,right_fitx,Minv,img)
+	newwarp,g = makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv,img)
 	print(undist.dtype)
 	print(newwarp.dtype)	
 	result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)

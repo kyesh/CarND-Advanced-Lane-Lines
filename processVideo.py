@@ -50,9 +50,10 @@ while(retval == True):
 	ploty = np.linspace(0, 499, num=500)
 	left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
 	right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
 	
-	newwarp,gs = fitLaneLines.makePrettyLane(warped,left_fitx,ploty,right_fitx,Minv,img)	
+	#print(ploty)
+	
+	newwarp,gs = fitLaneLines.makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv,img)	
 	
 	result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
 	
