@@ -91,12 +91,12 @@ def slidingWindowFit(binary_warped):
 	# Fit a second order polynomial to each
 	
 	#check for at least 20 points before fitting a line.
-	if len(leftx) < 100:
+	if len(leftx) < 200:
 		left_fit = []
 	else:
 		left_fit = np.polyfit(lefty, leftx, 2)
 
-	if len(rightx) < 100:
+	if len(rightx) < 200:
 		right_fit = []
 	else:
 		right_fit = np.polyfit(righty, rightx, 2)
