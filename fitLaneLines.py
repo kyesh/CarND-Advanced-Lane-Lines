@@ -17,8 +17,11 @@ def slidingWindowFit(binary_warped):
 	# These will be the starting point for the left and right lines
 	
 	midpoint = np.int(histogram.shape[0]/2)#think this should be shape 1 not 0 to get number of collumns?
-	leftx_base = np.argmax(histogram[:midpoint])
-	rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+	#leftx_base = np.argmax(histogram[:midpoint])
+	#rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+	
+	leftx_base = 25
+	rightx_base = 125
 	
 	#print('left',leftx_base,'right',rightx_base)
 	
@@ -76,15 +79,24 @@ def slidingWindowFit(binary_warped):
 	leftx = nonzerox[left_lane_inds]
 	lefty = nonzeroy[left_lane_inds] 
 	rightx = nonzerox[right_lane_inds]
-	righty = nonzeroy[right_lane_inds] 
+	righty = nonzeroy[right_lane_inds]
+	
+	#np.append(leftx,[25,25,25])
+	#np.append(lefty,[0,250,500])
+	
+	#np.append(rightx,[125,125,125])
+        #np.append(righty,[0,250,500])
+	 
 	
 	# Fit a second order polynomial to each
-	if len(leftx) < 10:
+	
+	#check for at least 20 points before fitting a line.
+	if len(leftx) < 100:
 		left_fit = []
 	else:
 		left_fit = np.polyfit(lefty, leftx, 2)
 
-	if len(rightx) < 10:
+	if len(rightx) < 100:
 		right_fit = []
 	else:
 		right_fit = np.polyfit(righty, rightx, 2)
