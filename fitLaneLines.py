@@ -79,16 +79,23 @@ def slidingWindowFit(binary_warped):
 	righty = nonzeroy[right_lane_inds] 
 	
 	# Fit a second order polynomial to each
-	left_fit = np.polyfit(lefty, leftx, 2)
-	right_fit = np.polyfit(righty, rightx, 2)
+	if len(leftx) < 10:
+		left_fit = []
+	else:
+		left_fit = np.polyfit(lefty, leftx, 2)
+
+	if len(rightx) < 10:
+		right_fit = []
+	else:
+		right_fit = np.polyfit(righty, rightx, 2)
 	
 	out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
 	out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 255, 0]
 
 
-	cv2.imwrite('laneHiglights.png',out_img)
+	#cv2.imwrite('laneHiglights.png',out_img)
 	
-	return [left_fit, right_fit]
+	return [left_fit, right_fit, out_img]
 	
 def computeRadiusAndLanePos(left_fit, right_fit):
 	ploty = np.linspace(0, 499, num=500)# to cover same y-range as image
@@ -103,7 +110,7 @@ def computeRadiusAndLanePos(left_fit, right_fit):
 	return [left_curverad, right_curverad, pos]
 	
 	
-def makePrettyLane(warped,left_fitx,right_fitx,Minv, image):
+def makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv, image):
 	# Create an image to draw the lines on
 	#warp_zero = np.zeros_like(warped).astype(np.uint8)
 	#color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
@@ -124,7 +131,7 @@ def makePrettyLane(warped,left_fitx,right_fitx,Minv, image):
 	# Combine the result with the original image
 	#result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
 	
-	return newwarp
+	return newwarp, color_warp
 	
 	
 	
