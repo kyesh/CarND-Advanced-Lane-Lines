@@ -103,8 +103,28 @@ def computeRadiusAndLanePos(left_fit, right_fit):
 	return [left_curverad, right_curverad, pos]
 	
 	
+def makePrettyLane(warped,left_fitx,right_fitx,Minv, image):
+	# Create an image to draw the lines on
+	#warp_zero = np.zeros_like(warped).astype(np.uint8)
+	#color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
 	
+	color_warp = np.zeros(warped.shape, dtype=np.uint8)
 	
+	# Recast the x and y points into usable format for cv2.fillPoly()
+	pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+	pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+	pts = np.hstack((pts_left, pts_right))
+	
+	# Draw the lane onto the warped blank image
+	cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+	print(image.shape)
+	print(image.size)
+	# Warp the blank back to original image space using inverse perspective matrix (Minv)
+	newwarp = cv2.warpPerspective(color_warp, Minv, (image.shape[1], image.shape[0])) 
+	# Combine the result with the original image
+	#result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
+	
+	return newwarp
 	
 	
 	
@@ -114,13 +134,28 @@ if __name__ == "__main__":
 	import matplotlib.pyplot as plt 
 	#img = cv2.imread('test_images/straight_lines1.jpg')
 	img = cv2.imread('test_images/test1.jpg')
-	warped = perspectivTransform.perspectiveTransform(createBinaryImage.pipeline(img))
 	
-	l , r = slidingWindowFit(warped)
-
-	lr , rr , p = computeRadiusAndLanePos(l,r)
+	Bi_img = createBinaryImage.pipeline(img)
+	warped, Minv, undist = perspectivTransform.perspectiveTransform(img)
+	warped, Minv, n_undist = perspectivTransform.perspectiveTransform(Bi_img)
+	
+	left_fit , right_fit = slidingWindowFit(warped)
+	
+	
+	
+	lr , rr , p = computeRadiusAndLanePos(left_fit,right_fit)
 	
 	print('left_radius:',lr*12/100,'ft right_raduis:',rr*12/100,'ft lane_position:',p*12/100,'ft')
+	ploty = np.linspace(0, 499, num=500)
+	left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+	right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+	
+	newwarp = makePrettyLane(warped,left_fitx,right_fitx,Minv,img)
+	print(undist.dtype)
+	print(newwarp.dtype)	
+	result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
+	print(cv2.imwrite('testk.png',result))
 	
 	histogram = np.sum(warped[warped.shape[0]//2:,:], axis=0)
 	plt.plot(histogram)
