@@ -17,10 +17,11 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
+[image1b]: ./cal_out/test_undist.jpg "Undistorted"
+[image1a]: ./camera_cal/calibration1.jpg "Orginal"
+[image2]: ./straight_cal.png "Road Transformed"
+[image3]: ./straight_binary.jpg "Binary Example"
+[image4]: ./perspectiveTransformedStriaght.png "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
@@ -39,60 +40,75 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+I based my work off of this repository that was shown in lecture. https://github.com/udacity/CarND-Camera-Calibration/blob/master/camera_calibration.ipynb
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+My work is in [calibrateCamera.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/calibrateCamera.py).
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+1. Updated the rows and column counts to match the ones for the provided checker patern. 
+2. I used to glob to select all the camera calibration images we were provieded. 
+3. Convert the image to grayscale using `gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)`
+4. Used `cv2.findChessboardCorners(gray, (cols,rows), None)` to get locations of chessboard corners
+5. Outputed drawn chess boards [here](https://github.com/kyesh/CarND-Advanced-Lane-Lines/tree/master/cal_out)
+6. Saved the points to a list
+7. Used `cv2.calibrateCamera(objpoints, imgpoints, img_size,None,None)` to get the calibartion matrixes
+8. Used `cv2.undistort(img, mtx, dist, None, mtx)` to undistor the following image
 
-![alt text][image1]
+![orginal][image1a]
+![unDistorted][image1b]
+
+9. Save the info to [cal.p](.cal_out/cal.p) with pickle
 
 ### Pipeline (single images)
 
-#### 1. Provide an example of a distortion-corrected image.
+#### 1. Example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
+I do this inside my perspective transform file and will go into more detail of how this was done there.
 ![alt text][image2]
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+#### 2. Binary Image Production
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+I didn't think the gradiant thresholding was very useful so I used predominatly image saturation for my thresholding. My work can be found in [createBinaryImage.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/createBinaryImage.py)
+
+1. First I started with the code provided in the lecture material.
+a.) Ordered sub-list
+b.) Converts the image to HLS colorspace
+c.) stores the s and l chanels
+d.) use the soble operater to get the gradaint across the image
+e.) filters gradiant and satruation channels by provieded inputs
+2. After that I created sliders using the OpenCV highgui to test various values of satruation and gradian
+3. I determined that gradaiant seemed to add more noise than data so I chose to set the min below the max ignoring that feature
 
 ![alt text][image3]
 
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+#### 3. Perspective Transform
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective Transform is located in [perspectiveTransform.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/perspectivTransform.py)
 
-```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-```
+1. First I need to figure out how to undistort the input image
+a.) read in the calibration matrix from the saved pickle file
+b.) use `cv2.undistort(img, mtx, dist, None, mtx)`
+2. I used gimp on one of the straight road segments to pick out good points for the perspective transform
+3. I decided I wanted the overhead view of the lane to have a pixel width of 100
+4. I selected the end values for the lanes acordingnly.
+5. I then tweaked the height of the overhead image to get a dashed lane lenght of 84px
+a.) that would give the end image a rough aspect ratio of 1by1 
 
 This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 575, 460      | 25, 0        | 
+| 705, 460      | 125, 0      |
+| 1042, 670     | 125, 500      |
+| 265, 670      | 25, 500       |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+Here is an example of the result on a straight road segment.
 
 ![alt text][image4]
 
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+#### 4. Fit Lane Lines
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+
 
 ![alt text][image5]
 
