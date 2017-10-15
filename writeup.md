@@ -23,8 +23,8 @@ The goals / steps of this project are the following:
 [image3]: ./straight_binary.jpg "Binary Example"
 [image4]: ./perspectiveTransformedStriaght.png "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[image6]: ./testk.png "Output"
+[video1]: ./output.avi "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -108,17 +108,54 @@ Here is an example of the result on a straight road segment.
 
 #### 4. Fit Lane Lines
 
+My work for this was done in [fitLaneLines.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/fitLaneLines.py) in the slidingWindowFit function.
+
+1. I started with the sliding window function provied in the lecture material and then made some modifications
+2. First is I had to subselect the histagram to get my chanel of intrest using `histogram = histogram[:,2]`
+3. Then I added `out_img = binary_warped.copy()` to get a copy of the orginal image to mark up with detections.
+4. Orignially I used the histogram to find the lane start positions but opped to used fixed starting value as when little to no know points were avalibe it gave unusual behavior
+5. I changed the margin, minpix and numwindows values a bit but I think their effect was negligable
+6. I added a conditional statement to only compute a new polyfit if there were sufficent points avalibe. This siginificantly cutdown on the number of weird lines generated when there were only a few points. Example below:
+```
+if len(leftx) < 200:
+
+		left_fit = []
+
+else:
+
+		left_fit = np.polyfit(lefty, leftx, 2)
+```
 
 
-![alt text][image5]
 
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### 5. Radius and Position Calculation
 
-I did this in lines # through # in my code in `my_other_file.py`
+My work for this was done in [fitLaneLines.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/fitLaneLines.py) in the computeRadiusAndLanePos function.
+
+1. I used the equations provided in the lecture material for calculating the radius in pixels
+```
+y_eval = np.max(ploty)
+left_curverad = ((1 + (2*left_fit[0]*y_eval + left_fit[1])**2)**1.5) / np.absolute(2*left_fit[0])
+right_curverad = ((1 + (2*right_fit[0]*y_eval + right_fit[1])**2)**1.5) / np.absolute(2*right_fit[0])
+```
+2. For lane position I got the average of the two lane start positions and differenced it from the center of the image to figure how far offset the car was from the center of the lane. Negitive corrisponds to left and positive to right.
+```
+pos = 75 - (left_fitx + right_fitx)/2
+```
+3. Computing the distance in feet was fairly straight forward as I made my image have a 1by1 aspect ratio using the info that "lane width of 12 feet or 3.7 meters, and the dashed lane lines are 10 feet or 3 meters long each" from the lecture material. I made the lane width 100px in the distination transform so the conversion is multiply by (12/100). The resulting code I used is.
+```
+text = "left_radius: " + str(lr*12/100) + "ft right_raduis:" + str(rr*12/100) + "ft lane_position:" +str(p*12/100) +"ft"	
+cv2.putText(result, text, (50,50), 1, 1, (0,0,255), 1)
+ ```
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+My work for this was done in [fitLaneLines.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/fitLaneLines.py) in the makePrettyLane function.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+1. I create and empty version of the warped image with `color_warp = np.zeros(warped.shape, dtype=np.uint8)`
+2. I then pair the x and y points that outline the lane
+3. I use `cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))` to draw the lane
+4. Then I use `newwarp = cv2.warpPerspective(color_warp, Minv, (image.shape[1], image.shape[0]))` to warp it into the orginal image shape
+5. Finally `result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)` is used to super impose the lane on the orginal image.
 
 ![alt text][image6]
 
@@ -126,14 +163,13 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 ### Pipeline (video)
 
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. The End Product!
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./output.avi)
+[video1]
 
 ---
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+I sturggled getting the warpPerspectice working as I orginaly thoughts were supposed to be in (row,col) for not (col,row). I also struggled to get openCV to read videos inside the Conda enviorment. Ultimatly i ran this outside the Conda enviorment. My currently algorithm would not work well if there was a lane change or sharp turns. The narrow slicing I did helps keep cars out of the image but also does not allow you to see the lane fully in sharp turns. Because starting points for the lanes were manually selected they would not generalize well to lane changes when lanes may be in the center of field of view.
