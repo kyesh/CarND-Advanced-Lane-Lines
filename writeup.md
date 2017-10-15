@@ -1,8 +1,7 @@
-## Writeup Template
+## **Advanced Lane Finding Project**
 
 ---
 
-**Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
 
@@ -172,4 +171,4 @@ Here's a [link to my video result](./output.avi)
 
 ### Discussion
 
-I sturggled getting the warpPerspectice working as I orginaly thoughts were supposed to be in (row,col) for not (col,row). I also struggled to get openCV to read videos inside the Conda enviorment. Ultimatly i ran this outside the Conda enviorment. My currently algorithm would not work well if there was a lane change or sharp turns. The narrow slicing I did helps keep cars out of the image but also does not allow you to see the lane fully in sharp turns. Because starting points for the lanes were manually selected they would not generalize well to lane changes when lanes may be in the center of field of view.
+I sturggled getting the warpPerspectice working as I orginaly thoughts were supposed to be in (row,col) for not (col,row). I also struggled to get openCV to read videos inside the Conda enviorment. Ultimatly I ran this outside the Conda enviorment. My currently algorithm would not work well if there was a lane change or sharp turns. The narrow slicing I did helps keep cars out of the image but also does not allow you to see the lane fully in sharp turns. Because starting points for the lanes were manually selected they would not generalize well to lane changes when lanes may be in the center of field of view. Improvments could be making it so lanes can be found regardless of starting position so that lane changes can be hanlded. Also better filtering out of cars would allow for wider camera view to detect turns and additional lanes.
