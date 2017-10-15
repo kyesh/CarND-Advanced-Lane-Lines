@@ -7,16 +7,17 @@ import matplotlib.pyplot as plt
 def slidingWindowFit(binary_warped):
 	# Assuming you have created a warped binary image called "binary_warped"
 	# Take a histogram of the bottom half of the image
-	histogram = np.sum(binary_warped[round(binary_warped.shape[0]/2):,:], axis=0)
-	histogram = histogram[:,2]
+	#histogram = np.sum(binary_warped[round(binary_warped.shape[0]/2):,:], axis=0)
+	#histogram = histogram[:,2]
 	# Create an output image to draw on and  visualize the result
 	#out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
 	#out_img = np.dstack((binary_warped[:,2], binary_warped[:,2], binary_warped[:,2]))*255
-	out_img = binary_warped.copy()
+	#out_img = binary_warped.copy()
+	out_img = np.zeros((binary_warped.shape[0],binary_warped.shape[1],3), np.uint8)
 	# Find the peak of the left and right halves of the histogram
 	# These will be the starting point for the left and right lines
 	
-	midpoint = np.int(histogram.shape[0]/2)#think this should be shape 1 not 0 to get number of collumns?
+	#midpoint = np.int(histogram.shape[0]/2)#think this should be shape 1 not 0 to get number of collumns?
 	#leftx_base = np.argmax(histogram[:midpoint])
 	#rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 	

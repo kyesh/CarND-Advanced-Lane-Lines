@@ -7,6 +7,23 @@ import perspectivTransform
 
 
 # Edit this function to create your own pipeline.
+
+#Select yellow and white from previous reviewer
+def select_yellow(image):
+	hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+	lower = np.array([20,60,60])
+	upper = np.array([38,174, 250])
+	mask = cv2.inRange(hsv, lower, upper)
+	
+	return mask
+
+def select_white(image):
+	lower = np.array([202,202,202])
+	upper = np.array([255,255,255])
+	mask = cv2.inRange(image, lower, upper)
+	
+	return mask
+
 def pipeline(img, s_thresh=(150, 255), sx_thresh=(147, 100)):
     img = np.copy(img)
     # Convert to HLS color space and separate the V channel

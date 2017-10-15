@@ -31,8 +31,12 @@ while(retval == True):
 	
 	cv2.imwrite('lastImg.png',img)
 	
-	Bi_img = createBinaryImage.pipeline(img)
-	warped, Minv, undist = perspectivTransform.perspectiveTransform(img)
+	#Bi_img = createBinaryImage.pipeline(img)
+	yellow = createBinaryImage.select_yellow(img)
+	white = createBinaryImage.select_white(img)
+	Bi_img = cv2.add(yellow, white)
+	cv2.imwrite('lastBiImg.png',Bi_img)
+	warped1, Minv, undist = perspectivTransform.perspectiveTransform(img)
 	warped, Minv, n_undist = perspectivTransform.perspectiveTransform(Bi_img)
 	
 	left_fit , right_fit, laneBox = fitLaneLines.slidingWindowFit(warped)
@@ -53,11 +57,15 @@ while(retval == True):
 	
 	#print(ploty)
 	
-	newwarp,gs = fitLaneLines.makePrettyLane(warped,left_fitx,right_fitx,ploty,Minv,img)	
+	newwarp,gs = fitLaneLines.makePrettyLane(warped1,left_fitx,right_fitx,ploty,Minv,img)	
 	
 	result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
-	text = "left_radius: " + str(lr*12/100) + "ft right_raduis:" + str(rr*12/100) + "ft lane_position:" +str(p*12/100) +"ft"	
-	cv2.putText(result, text, (50,50), 1, 1, (0,0,255), 1)
+	text1 = "left_radius:" + str(lr*3.7/100) + "m"
+	text2 = "right_raduis:" + str(rr*3.7/100) + "m"
+	text3 = "lane_position:" +str(p*3.7/100) +"m"	
+	cv2.putText(result, text1, (50,50), 1, 3, (0,0,255), 2)
+	cv2.putText(result, text2, (50,100), 1, 3, (0,0,255), 2)
+	cv2.putText(result, text3, (50,150), 1, 3, (0,0,255), 2)
 	
 	
 	video_writer.write(result)
