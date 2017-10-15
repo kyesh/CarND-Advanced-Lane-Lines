@@ -77,6 +77,8 @@ e.) filters gradiant and satruation channels by provieded inputs
 2. After that I created sliders using the OpenCV highgui to test various values of satruation and gradian
 3. I determined that gradaiant seemed to add more noise than data so I chose to set the min below the max ignoring that feature
 
+Used new color filtering values from last reviewer
+
 ![alt text][image3]
 
 #### 3. Perspective Transform
@@ -146,6 +148,8 @@ pos = 75 - (left_fitx + right_fitx)/2
 text = "left_radius: " + str(lr*12/100) + "ft right_raduis:" + str(rr*12/100) + "ft lane_position:" +str(p*12/100) +"ft"	
 cv2.putText(result, text, (50,50), 1, 1, (0,0,255), 1)
  ```
+ 
+ Changed to meters as requested.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 My work for this was done in [fitLaneLines.py](https://github.com/kyesh/CarND-Advanced-Lane-Lines/blob/master/fitLaneLines.py) in the makePrettyLane function.
